@@ -18,10 +18,11 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
   WordSearchGame({required this.config}) {
     timeLeft = config.timeLimit;
+    words = config.words;
   }
   static const gridSize = 8;
   late List<List<LetterComponent>> grid;
-  final List<String> words = ['MADAN', 'KAILASH', 'ABHISHEK', 'KAMLESH',];
+   List<String> words = [];
   List<String> foundWords = [];
   List<Vector2> selectedCells = [];
   double cellSize = 0;
