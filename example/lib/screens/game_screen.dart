@@ -1,9 +1,10 @@
-import 'package:find_the_word/game/config/game_result.dart';
-import 'package:find_the_word/ui/menus/game_over_menu.dart';
+import 'package:find_the_word/src/find_the_word.dart';
+import 'package:find_the_word/src/game/config/game_result.dart';
+import 'package:find_the_word/src/game/config/word_search_game.dart';
+import 'package:find_the_word/src/ui/menus/game_over_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import '../game/config/word_search_game.dart';
-import '../game/word_search_game.dart';
+
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});

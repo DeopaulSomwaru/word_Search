@@ -1,4 +1,3 @@
-import 'package:find_the_word/game/components/line_component.dart';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'components/board_component.dart';
 import 'components/letter_component.dart';
+import 'components/line_component.dart';
 import 'components/score_display.dart';
 import 'components/timer_display.dart';
 import 'components/word_list.dart';
