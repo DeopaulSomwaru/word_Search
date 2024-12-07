@@ -11,3 +11,7 @@
 ## 1.0.1
 
 * Change the file permission
+
+## 1.0.2
+
+* Add game render widget
