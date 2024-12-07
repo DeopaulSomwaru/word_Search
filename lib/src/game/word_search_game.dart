@@ -22,7 +22,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   }
   static const gridSize = 8;
   late List<List<LetterComponent>> grid;
-   List<String> words = [];
+  List<String> words = [];
   List<String> foundWords = [];
   List<Vector2> selectedCells = [];
   double cellSize = 0;
@@ -289,6 +289,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
   @override
   bool onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
     if (!isGameStarted || isPaused) return false;
 
     Vector2? cell = getGridCell(event.canvasPosition);
@@ -304,7 +305,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   bool onDragUpdate(DragUpdateEvent event) {
     if (!isGameStarted || isPaused) return false;
 
-    Vector2? cell = getGridCell(event.canvasPosition);
+    Vector2? cell = getGridCell(event.canvasStartPosition);
 
     if (cell != null) {
       List<Vector2> potentialPath = [...selectedCells, cell];
@@ -318,6 +319,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
   @override
   bool onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
     if (!isGameStarted || isPaused) return false;
     checkSelectedWord();
     return false;

@@ -4,7 +4,7 @@ import '../../game/word_search_game.dart';
 class MainMenu extends StatelessWidget {
   final WordSearchGame game;
 
-  const MainMenu({Key? key, required this.game}) : super(key: key);
+  const MainMenu({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {

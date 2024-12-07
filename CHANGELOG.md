@@ -7,3 +7,7 @@
 * Animations and effects
 * Score tracking
 * Timer implementation
+
+## 1.0.1
+
+* Change the file permission

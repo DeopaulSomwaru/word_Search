@@ -10,12 +10,12 @@ class BoardComponent extends PositionComponent {
   @override
   void render(Canvas canvas) {
     final rect = Rect.fromLTWH(0, 0, bSize, bSize);
-    final gradient = LinearGradient(
+    final gradient = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        const Color(0xFF2C3E50),
-        const Color(0xFF3498DB),
+        Color(0xFF2C3E50),
+        Color(0xFF3498DB),
       ],
     ).createShader(rect);
 

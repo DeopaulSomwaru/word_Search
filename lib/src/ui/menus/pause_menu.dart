@@ -4,7 +4,7 @@ import '../../game/word_search_game.dart';
 class PauseMenu extends StatelessWidget {
   final WordSearchGame game;
 
-  const PauseMenu({Key? key, required this.game}) : super(key: key);
+  const PauseMenu({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
