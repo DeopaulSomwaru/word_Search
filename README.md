@@ -20,9 +20,9 @@ Add this to your package's `pubspec.yaml` file:
 dependencies:
   find_the_word: ^1.0.0
 ```
-
+## Screenshot
+https://github.com/abhiiishek2000/flutter-ftw/blob/main/screenshot/ftw_preview.gif
 ## Usage
-
 
 ```dart
 import 'package:find_the_word/find_the_word.dart';
