@@ -23,7 +23,6 @@ dependencies:
 
 ## Usage
 
-<blockquote class="twitter-tweet" data-media-max-width="560"><p lang="en" dir="ltr">Hii flutter devs, i recently explored the flutter flame and created the simple find the word game with a decent animation, after all this i can say flame is very good for 2D games.<br>Also i created package for this game: <a href="https://t.co/sy9Sk0dFcc">https://t.co/sy9Sk0dFcc</a><a href="https://twitter.com/hashtag/flutter?src=hash&amp;ref_src=twsrc%5Etfw">#flutter</a> <a href="https://twitter.com/hashtag/flutterdev?src=hash&amp;ref_src=twsrc%5Etfw">#flutterdev</a> <a href="https://t.co/SEooxCmzGL">pic.twitter.com/SEooxCmzGL</a></p>&mdash; Abhishek Kumar 💙 (@tt_abhiiishek) <a href="https://twitter.com/tt_abhiiishek/status/1865374456744751358?ref_src=twsrc%5Etfw">December 7, 2024</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 ```dart
 import 'package:find_the_word/find_the_word.dart';
