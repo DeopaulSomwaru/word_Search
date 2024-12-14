@@ -15,3 +15,7 @@
 ## 1.0.2
 
 * Add game render widget
+
+## 1.0.3
+
+* Add screenshot
