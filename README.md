@@ -18,10 +18,10 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  find_the_word: ^1.0.0
+  find_the_word: ^1.0.4
 ```
 ## Screenshot
-https://github.com/abhiiishek2000/flutter-ftw/blob/main/screenshot/ftw_preview.gif
+<img src="https://raw.githubusercontent.com/abhiiishek2000/flutter-ftw/refs/heads/main/screenshot/ftw_preview.gif" width="300" height="600"></img>
 ## Usage
 
 ```dart

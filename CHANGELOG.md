@@ -19,3 +19,7 @@
 ## 1.0.3
 
 * Add screenshot
+
+## 1.0.4
+
+* Update the readme.md
