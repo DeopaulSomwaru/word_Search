@@ -23,6 +23,7 @@ dependencies:
 
 ## Usage
 
+
 ```dart
 import 'package:find_the_word/find_the_word.dart';
 
