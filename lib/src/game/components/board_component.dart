@@ -14,8 +14,8 @@ class BoardComponent extends PositionComponent {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        Color(0xFF2C3E50),
-        Color(0xFF3498DB),
+        Colors.white,
+        Colors.white,
       ],
     ).createShader(rect);
 
@@ -48,7 +48,7 @@ class BoardComponent extends PositionComponent {
     canvas.drawRect(
       rect,
       Paint()
-        ..color = Colors.white.withOpacity(0.5)
+        ..color = Colors.black.withOpacity(0.5)
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke
         ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 3),

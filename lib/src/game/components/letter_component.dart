@@ -32,13 +32,13 @@ class LetterComponent extends PositionComponent {
       text: letter,
       textRenderer: TextPaint(
         style: const TextStyle(
-          color: Colors.white,
+          color: Colors.black,
           fontSize: 24,
           fontWeight: FontWeight.bold,
           shadows: [
             Shadow(
               blurRadius: 8,
-              color: Colors.blue,
+              color: Colors.black,
               offset: Offset(0, 0),
             ),
           ],

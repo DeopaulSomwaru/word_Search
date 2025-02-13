@@ -16,6 +16,7 @@ class WordSearchGameWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GameWidget(
+      
       game: WordSearchGame(config: config),
       loadingBuilder: (context) => Center(
         child: CircularProgressIndicator(
@@ -26,6 +27,7 @@ class WordSearchGameWidget extends StatelessWidget {
       overlayBuilderMap: {
         'gameOver': (context, game) => GameOverMenu(game: game as WordSearchGame),
       },
+      
     );
   }
 }

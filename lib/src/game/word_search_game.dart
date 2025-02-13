@@ -1,3 +1,5 @@
+import 'package:find_the_word/src/game/components/background_widget.dart';
+import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -20,6 +22,8 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     timeLeft = config.timeLimit;
     words = config.words;
   }
+
+  
   static const gridSize = 8;
   late List<List<LetterComponent>> grid;
   List<String> words = [];
@@ -47,14 +51,36 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   late ScoreDisplay scoreDisplay;
   late TimerDisplay timerDisplay;
   late WordList wordList;
+  late BackgroundDesign backgroundComponent;
 
 // Update the onLoad method in word_search_game.dart
+ 
+
 
   @override
   Future<void> onLoad() async {
+  //     add(RectangleComponent(
+  //   size: size, 
+  //   paint: Paint()..color = Colors.blueGrey, // Change this to any color
+  // ));
+  // ON TEST
+  // Load the background image
+   
+    
+    // Add a custom component to render the image as background
+  final background = BackgroundDesign();
+  await add(background); // Add it to the game first
+
+  // Ensure it resizes after being added
+  background.size = size;
+    
+
+
+
+  // ON TEST
     // Set fixed heights for UI sections
-    const topUIHeight = 200.0;  // Fixed height for top UI
-    const bottomUIHeight = 100.0;  // Fixed height for bottom UI
+    const topUIHeight = 150.0;  // Fixed height for top UI
+    const bottomUIHeight = 200.0;  // Fixed height for bottom UI
     topPadding = topUIHeight;
 
     // Calculate available height for the board
