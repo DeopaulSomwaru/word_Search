@@ -31,6 +31,7 @@ class WordList extends PositionComponent {
             (entry.key % 3) * wordWidth,
             (entry.key ~/ 3) * rowHeight,
           ),
+          
           textRenderer: TextPaint(
             style: TextStyle(
               color: isFound ? Colors.green : Colors.white70,
@@ -61,7 +62,7 @@ class WordList extends PositionComponent {
             ),
             size: Vector2(wordWidth - 10, rowHeight),
             paint: Paint()
-              ..color = Colors.green.withOpacity(0.2)
+              ..color = Colors.green.withAlpha((0.2 * 255).toInt())
               ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 2),
           );
           add(background);

@@ -16,7 +16,7 @@ class MainMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.withOpacity(0.3),
+              color: Colors.blue.withAlpha((0.3 * 255).toInt()),
               blurRadius: 10,
               spreadRadius: 2,
             ),

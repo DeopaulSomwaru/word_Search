@@ -8,7 +8,7 @@ class LineComponent extends PositionComponent {
 
   LineComponent(this.start, this.end, Color color)
       : linePaint = Paint()
-    ..color = color.withOpacity(1.0)
+    ..color = color.withAlpha((1.0 * 255).toInt())
     ..strokeWidth = 3
     ..strokeCap = StrokeCap.round;
 
@@ -22,6 +22,6 @@ class LineComponent extends PositionComponent {
   }
 
   void setOpacity(double opacity) {
-    linePaint.color = linePaint.color.withOpacity(opacity);
+    linePaint.color = linePaint.color.withAlpha((opacity * 255).toInt());
   }
 }

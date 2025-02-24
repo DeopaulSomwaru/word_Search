@@ -23,7 +23,7 @@ class LetterComponent extends PositionComponent {
       size: size * 0.9,
       position: size * 0.05,
       paint: Paint()
-        ..color = Colors.white.withOpacity(0.1)
+        ..color = Colors.white.withAlpha((0.1 * 255).toInt())
         ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 2),
     );
     add(background);
@@ -79,7 +79,7 @@ class LetterComponent extends PositionComponent {
 
   void deselect() {
     isSelected = false;
-    background.paint.color = Colors.white.withOpacity(0.1);
+    background.paint.color = Colors.white.withAlpha((0.1 * 255).toInt());
     add(
       ScaleEffect.by(
         Vector2.all(1/1.2),
@@ -95,7 +95,7 @@ class LetterComponent extends PositionComponent {
     isFound = true;
 
     background.paint
-      ..color = wordColor.withOpacity(0.3)
+      ..color = wordColor.withAlpha((0.3 * 255).toInt())
       ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 2);
 
     textComponent.textRenderer = TextPaint(
