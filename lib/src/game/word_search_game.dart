@@ -20,6 +20,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   WordSearchGame({required this.config}) {
     timeLeft = config.timeLimit;
     words = config.words;
+    wordHeight = config.wordHeight;
   }
 
   late int gridSize;
@@ -34,6 +35,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   double timeLeft = 180;
   bool isGameStarted = false;
   bool isPaused = false;
+  int wordHeight = 20;
 
   final List<Color> wordColors = [
     Colors.green,
@@ -142,7 +144,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
       initialTime: timeLeft,
     );
     wordList = WordList(
-      position: Vector2(20, size.y - 110 + 10),
+      position: Vector2(20, size.y - wordHeight + 10),
       words: words,
       foundWords: foundWords,
       availableWidth: size.x - 20,
