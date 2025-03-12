@@ -142,7 +142,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
       initialTime: timeLeft,
     );
     wordList = WordList(
-      position: Vector2(20, size.y - 400 + 10),
+      position: Vector2(20, size.y - 200 + 10),
       words: words,
       foundWords: foundWords,
       availableWidth: size.x - 20,
