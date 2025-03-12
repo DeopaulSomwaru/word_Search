@@ -8,7 +8,7 @@ class WordSearchConfig {
   final Color primaryColor;
   final Color secondaryColor;
   final double timeLimit;
-  final int wordHeight;
+  final double wordHeight;
 
   WordSearchConfig({
     required this.words,
