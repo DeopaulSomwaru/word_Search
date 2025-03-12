@@ -1,5 +1,4 @@
 import 'package:find_the_word/src/game/components/background_widget.dart';
-import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -23,8 +22,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     words = config.words;
   }
 
-  
-  static const gridSize = 8;
+  late int gridSize;
   late List<List<LetterComponent>> grid;
   List<String> words = [];
   List<String> foundWords = [];
@@ -53,139 +51,156 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   late WordList wordList;
   late BackgroundDesign backgroundComponent;
 
-// Update the onLoad method in word_search_game.dart
- 
-
-
   @override
   Future<void> onLoad() async {
-  //     add(RectangleComponent(
-  //   size: size, 
-  //   paint: Paint()..color = Colors.blueGrey, // Change this to any color
-  // ));
-  // ON TEST
-  // Load the background image
-   
-    
-    // Add a custom component to render the image as background
-  final background = BackgroundDesign();
-  await add(background); // Add it to the game first
+    // Calculate the required grid size based on the longest word
+    gridSize = calculateGridSize();
 
-  // Ensure it resizes after being added
-  background.size = size;
-    
+    // Load and add the background
+    final background = BackgroundDesign();
+    await add(background);
+    background.size = size;
 
-
-
-  // ON TEST
     // Set fixed heights for UI sections
-    const topUIHeight = 150.0;  // Fixed height for top UI
-    const bottomUIHeight = 200.0;  // Fixed height for bottom UI
+    const topUIHeight = 150.0;
+    const bottomUIHeight = 200.0;
     topPadding = topUIHeight;
 
-    // Calculate available height for the board
+    // Calculate cell size and grid offset
     final availableHeight = size.y - topUIHeight - bottomUIHeight;
-
-    // Calculate cell size based on the smaller of available width or height
-    // to ensure board fits in both dimensions
-    cellSize = min(
-      (size.x * 0.9) / gridSize,  // 90% of screen width
-      availableHeight / gridSize,  // Available height
-    );
-
-    // Calculate board size
+    cellSize = min((size.x * 0.9) / gridSize, availableHeight / gridSize);
     final boardSize = cellSize * gridSize;
-
-    // Center the board horizontally
     gridOffset = (size.x - boardSize) / 2;
 
-    // Add board background
-    board = BoardComponent(
-      bSize: boardSize,
-      gridSize: gridSize,
-    );
-    board.position = Vector2(gridOffset, topUIHeight);
-    add(board);
-
-    // Initialize grid with centered positions
-    grid = List.generate(
-      gridSize,
-          (i) => List.generate(
-        gridSize,
-            (j) => LetterComponent(
-          position: Vector2(
-            gridOffset + j * cellSize,
-            -cellSize * (gridSize - i),  // Start above screen
-          ),
-          size: Vector2.all(cellSize),
-          letter: '',
-          targetPosition: Vector2(
-            gridOffset + j * cellSize,
-            topUIHeight + i * cellSize,  // Target position with top padding
-          ),
-        ),
-      ),
-    );
+    // Initialize board and grid
+    initializeBoard(boardSize);
+    initializeGrid();
 
     // Place words and fill empty spaces
     placeWords();
     fillEmptySpaces();
 
     // Add letters with animation
+    await addLettersWithAnimation();
+
+    // Add UI components
+    addUIComponents();
+    isGameStarted = true;
+    isPaused = false;
+  }
+
+  int calculateGridSize() {
+    int longestWordLength = words.map((word) => word.length).reduce(max);
+    return max(12, longestWordLength); // Ensure a minimum grid size of 12x12
+  }
+
+  void initializeBoard(double boardSize) {
+    board = BoardComponent(
+      bSize: boardSize,
+      gridSize: gridSize,
+    );
+    board.position = Vector2(gridOffset, topPadding);
+    add(board);
+  }
+
+  void initializeGrid() {
+    grid = List.generate(
+      gridSize,
+      (i) => List.generate(
+        gridSize,
+        (j) => LetterComponent(
+          position: Vector2(
+            gridOffset + j * cellSize,
+            -cellSize * (gridSize - i),
+          ),
+          size: Vector2.all(cellSize),
+          letter: '',
+          targetPosition: Vector2(
+            gridOffset + j * cellSize,
+            topPadding + i * cellSize,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> addLettersWithAnimation() async {
     for (int i = 0; i < gridSize; i++) {
       for (int j = 0; j < gridSize; j++) {
         add(grid[i][j]);
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future.delayed(const Duration(milliseconds: 10));
       }
     }
+  }
 
-    // Position UI elements
+  void addUIComponents() {
     scoreDisplay = ScoreDisplay(
-      position: Vector2(20, topUIHeight / 2),  // Centered in top area
+      position: Vector2(20, topPadding / 2),
     );
-
     timerDisplay = TimerDisplay(
-      position: Vector2(
-        size.x - 140,  // Right aligned with padding
-        topUIHeight / 2,  // Centered in top area
-      ),
+      position: Vector2(size.x - 140, topPadding / 2),
       initialTime: timeLeft,
     );
-
     wordList = WordList(
-      position: Vector2(
-        20,  // Left padding
-        size.y - bottomUIHeight + 10,  // Bottom position with padding
-      ),
+      position: Vector2(20, size.y - 400 + 10),
       words: words,
       foundWords: foundWords,
-      availableWidth: size.x - 40,  // Full width minus padding
+      availableWidth: size.x - 20,
     );
 
     add(scoreDisplay);
     add(timerDisplay);
     add(wordList);
-    isGameStarted = true;
-    isPaused = false;
   }
 
-
   void placeWords() {
-    for (String word in words) {
-      bool placed = false;
-      int attempts = 0;
+    // Sort words by length (longest first)
+    words.sort((a, b) => b.length.compareTo(a.length));
 
-      while (!placed && attempts < 100) {
-        int direction = Random().nextInt(4);
-        int row = Random().nextInt(gridSize);
-        int col = Random().nextInt(gridSize);
+    int maxAttempts = 3; // Maximum regeneration attempts
+    int attempts = 0;
 
-        if (canPlaceWord(word, row, col, direction)) {
-          placeWord(word, row, col, direction);
-          placed = true;
+    while (attempts < maxAttempts) {
+      // Clear the grid
+      for (int i = 0; i < gridSize; i++) {
+        for (int j = 0; j < gridSize; j++) {
+          grid[i][j].letter = '';
         }
-        attempts++;
       }
+
+      // Try placing words
+      bool allWordsPlaced = true;
+      for (String word in words) {
+        bool placed = false;
+        int placementAttempts = 0;
+
+        while (!placed && placementAttempts < 500) {
+          int direction = Random().nextInt(6); // Added more directions
+          int row = Random().nextInt(gridSize);
+          int col = Random().nextInt(gridSize);
+
+          if (canPlaceWord(word, row, col, direction)) {
+            placeWord(word, row, col, direction);
+            placed = true;
+          }
+          placementAttempts++;
+        }
+
+        if (!placed) {
+          allWordsPlaced = false;
+          break;
+        }
+      }
+
+      if (allWordsPlaced) {
+        break; // Exit if all words are placed
+      }
+
+      attempts++;
+    }
+
+    if (attempts == maxAttempts) {
+      print('Failed to place all words after $maxAttempts attempts');
     }
   }
 
@@ -195,6 +210,8 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
       [[1, 0]],        // vertical down
       [[0, 1], [1, 0]], // L-shape right then down
       [[1, 0], [0, 1]], // L-shape down then right
+      [[1, 1]],        // diagonal down-right
+      [[1, -1]],       // diagonal down-left
     ];
 
     if (direction >= directions.length) return false;
@@ -238,6 +255,8 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
       [[1, 0]],        // vertical down
       [[0, 1], [1, 0]], // L-shape right then down
       [[1, 0], [0, 1]], // L-shape down then right
+      [[1, 1]],        // diagonal down-right
+      [[1, -1]],       // diagonal down-left
     ];
 
     List<List<int>> currentDirection = directions[direction];
@@ -508,7 +527,6 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     isGameStarted = false;
     isPaused = true;
 
-    // Call the callback with game results
     config.onGameOver(
       GameResult(
         score: score,
