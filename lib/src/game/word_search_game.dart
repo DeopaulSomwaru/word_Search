@@ -313,21 +313,18 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     }
   }
 
-void fillEmptySpaces() {
-  const vowels = ['A', 'E', 'I', 'O', 'U'];
-  final random = Random();
-  
-  for (var i = 0; i < gridSize; i++) {
-    for (var j = 0; j < gridSize; j++) {
-      if (grid[i][j].letter.isEmpty) {
-        // 40% chance for vowels to make words more findable
-        grid[i][j].letter = random.nextDouble() < 0.4
-            ? vowels[random.nextInt(vowels.length)]
-            : String.fromCharCode(65 + random.nextInt(25));
+  void fillEmptySpaces() {
+    const String alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    Random random = Random();
+
+    for (int i = 0; i < gridSize; i++) {
+      for (int j = 0; j < gridSize; j++) {
+        if (grid[i][j].letter.isEmpty) {
+          grid[i][j].letter = alphabet[random.nextInt(alphabet.length)];
+        }
       }
     }
   }
-}
 
   @override
   void update(double dt) {
