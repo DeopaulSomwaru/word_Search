@@ -21,7 +21,16 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     timeLeft = config.timeLimit;
     words = config.words;
     wordHeight = config.wordHeight;
+    topUIHeight = config.topUIHeight;
+    bottomUIHeight = config.bottomUIHeight;
+    timerWidth = config.timerWidth;
+    scoreWidth = config.scoreWidth;
+    cellPadding = config.cellPadding;
   }
+
+
+  final double gridWidthPercentage = 0.9; // Increased from 0.8
+   double cellPadding = 5.0; // Space between cells
 
   late int gridSize;
   late List<List<LetterComponent>> grid;
@@ -36,6 +45,10 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   bool isGameStarted = false;
   bool isPaused = false;
   double wordHeight = 20;
+  double timerWidth = 20;
+  double scoreWidth = 20;
+  double topUIHeight = 100.0; // Reduced to give more space to the grid
+  double bottomUIHeight = 150.0; // Reduced to give more space to the grid
 
   final List<Color> wordColors = [
     Colors.green,
@@ -55,51 +68,68 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
   @override
   Future<void> onLoad() async {
-    // Calculate the required grid size based on the longest word
-    gridSize = calculateGridSize();
+      gridSize = calculateGridSize();
+    cellPadding = _calculateCellPadding(); // New dynamic padding calculation
 
-    // Load and add the background
     final background = BackgroundDesign();
     await add(background);
     background.size = size;
 
-    // Set fixed heights for UI sections
-    const topUIHeight = 150.0;
-    const bottomUIHeight = 200.0;
     topPadding = topUIHeight;
 
-    // Calculate cell size and grid offset
+    // Calculate cell size with padding
+    final availableWidth = size.x * gridWidthPercentage;
     final availableHeight = size.y - topUIHeight - bottomUIHeight;
-    cellSize = min((size.x * 0.9) / gridSize, availableHeight / gridSize);
-    final boardSize = cellSize * gridSize;
-    gridOffset = (size.x - boardSize) / 2;
+    cellSize = min(
+      (availableWidth - (cellPadding * (gridSize - 1))) / gridSize,
+      (availableHeight - (cellPadding * (gridSize - 1))) / gridSize,
+    );
 
-    // Initialize board and grid
-    initializeBoard(boardSize);
+    // Calculate total board size including padding
+    final boardWidth = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
+    final boardHeight = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
+    
+    gridOffset = (size.x - boardWidth) / 2;
+
+    initializeBoard(boardWidth, boardHeight);
     initializeGrid();
-
-    // Place words and fill empty spaces
     placeWords();
     fillEmptySpaces();
-
-    // Add letters with animation
     await addLettersWithAnimation();
-
-    // Add UI components
     addUIComponents();
     isGameStarted = true;
-    isPaused = false;
   }
 
-  int calculateGridSize() {
-    int longestWordLength = words.map((word) => word.length).reduce(max);
-    return max(12, longestWordLength); // Ensure a minimum grid size of 12x12
+  // int calculateGridSize() {
+  //   int longestWordLength = words.map((word) => word.length).reduce(max);
+  //   return max(10, longestWordLength); // Ensure a minimum grid size of 10x10
+  // }
+    int calculateGridSize() {
+    final longestWordLength = words.map((word) => word.length).reduce(max);
+    final wordCount = words.length;
+    
+    // Calculate buffer based on word count (1 extra row/column for every 6 words)
+    final buffer = (wordCount / 6).ceil();
+    
+    // Calculate base size considering word length and density
+    int calculatedSize = longestWordLength + buffer;
+    
+    // Ensure minimum size while allowing space for word placement
+    return max(longestWordLength + 2, calculatedSize).clamp(10, 20);
   }
 
-  void initializeBoard(double boardSize) {
+  double _calculateCellPadding() {
+    // Dynamic padding based on grid size (larger grids get smaller padding)
+    final basePadding = 8.0;
+    final paddingReduction = gridSize / 12;
+    return (basePadding - paddingReduction).clamp(4.0, 8.0);
+  }
+
+  void initializeBoard(double boardWidth, double boardHeight) {
     board = BoardComponent(
-      bSize: boardSize,
+      bSize: boardWidth,
       gridSize: gridSize,
+      cellPadding: cellPadding,
     );
     board.position = Vector2(gridOffset, topPadding);
     add(board);
@@ -112,14 +142,14 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
         gridSize,
         (j) => LetterComponent(
           position: Vector2(
-            gridOffset + j * cellSize,
-            -cellSize * (gridSize - i),
+            gridOffset + j * (cellSize + cellPadding),
+          - (cellSize + cellPadding) * (gridSize - i),
           ),
           size: Vector2.all(cellSize),
           letter: '',
           targetPosition: Vector2(
-            gridOffset + j * cellSize,
-            topPadding + i * cellSize,
+            gridOffset + j * (cellSize + cellPadding),
+            topPadding + i * (cellSize + cellPadding),
           ),
         ),
       ),
@@ -137,10 +167,10 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
   void addUIComponents() {
     scoreDisplay = ScoreDisplay(
-      position: Vector2(20, topPadding / 2),
+      position: Vector2(scoreWidth, topPadding / 2),
     );
     timerDisplay = TimerDisplay(
-      position: Vector2(size.x - 140, topPadding / 2),
+      position: Vector2(size.x - timerWidth, topPadding / 2),
       initialTime: timeLeft,
     );
     wordList = WordList(
@@ -283,18 +313,21 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     }
   }
 
-  void fillEmptySpaces() {
-    const String alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    Random random = Random();
-
-    for (int i = 0; i < gridSize; i++) {
-      for (int j = 0; j < gridSize; j++) {
-        if (grid[i][j].letter.isEmpty) {
-          grid[i][j].letter = alphabet[random.nextInt(alphabet.length)];
-        }
+void fillEmptySpaces() {
+  const vowels = ['A', 'E', 'I', 'O', 'U'];
+  final random = Random();
+  
+  for (var i = 0; i < gridSize; i++) {
+    for (var j = 0; j < gridSize; j++) {
+      if (grid[i][j].letter.isEmpty) {
+        // 40% chance for vowels to make words more findable
+        grid[i][j].letter = random.nextDouble() < 0.4
+            ? vowels[random.nextInt(vowels.length)]
+            : String.fromCharCode(65 + random.nextInt(25));
       }
     }
   }
+}
 
   @override
   void update(double dt) {
@@ -376,8 +409,8 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     double relativeX = position.x - gridOffset;
     double relativeY = position.y - topPadding;
 
-    int col = (relativeX / cellSize).floor();
-    int row = (relativeY / cellSize).floor();
+    int col = (relativeX / (cellSize + cellPadding)).floor();
+    int row = (relativeY / (cellSize + cellPadding)).floor();
 
     if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
       return Vector2(row.toDouble(), col.toDouble());
@@ -465,8 +498,8 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
       add(
         ParticleSystemComponent(
           position: Vector2(
-            gridOffset + cell.y * cellSize + cellSize / 2,
-            topPadding + cell.x * cellSize + cellSize / 2,
+            gridOffset + cell.y * (cellSize + cellPadding) + cellSize / 2,
+            topPadding + cell.x * (cellSize + cellPadding) + cellSize / 2,
           ),
           particle: Particle.generate(
             count: 20,
@@ -495,12 +528,12 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
       var line = LineComponent(
         Vector2(
-          gridOffset + currentCell.y * cellSize + cellSize / 2,
-          topPadding + currentCell.x * cellSize + cellSize / 2,
+          gridOffset + currentCell.y * (cellSize + cellPadding) + cellSize / 2,
+          topPadding + currentCell.x * (cellSize + cellPadding) + cellSize / 2,
         ),
         Vector2(
-          gridOffset + nextCell.y * cellSize + cellSize / 2,
-          topPadding + nextCell.x * cellSize + cellSize / 2,
+          gridOffset + nextCell.y * (cellSize + cellPadding) + cellSize / 2,
+          topPadding + nextCell.x * (cellSize + cellPadding) + cellSize / 2,
         ),
         wordColor,
       );

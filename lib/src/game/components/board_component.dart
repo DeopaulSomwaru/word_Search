@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 class BoardComponent extends PositionComponent {
   final double bSize;
   final int gridSize;
+   final double cellPadding;
 
-  BoardComponent({required this.bSize, required this.gridSize});
+  BoardComponent({required this.bSize, required this.gridSize, required this.cellPadding,});
 
   @override
   void render(Canvas canvas) {
@@ -29,18 +30,18 @@ class BoardComponent extends PositionComponent {
     final cellSize = bSize / gridSize;
     final paint = Paint()
       ..color = Colors.white.withOpacity(0.2)
-      ..strokeWidth = 1.0
+      ..strokeWidth = 2.0
       ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 1);
 
     for (int i = 1; i < gridSize; i++) {
       canvas.drawLine(
-        Offset(i * cellSize, 0),
-        Offset(i * cellSize, bSize),
+        Offset(i * (bSize / gridSize + cellPadding), 0),
+        Offset(i * (bSize / gridSize + cellPadding), bSize),
         paint,
       );
       canvas.drawLine(
-        Offset(0, i * cellSize),
-        Offset(bSize, i * cellSize),
+      Offset(0, i * (bSize / gridSize + cellPadding)),
+        Offset(bSize, i * (bSize / gridSize + cellPadding)),
         paint,
       );
     }
