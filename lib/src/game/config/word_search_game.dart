@@ -14,6 +14,7 @@ class WordSearchConfig {
    final double timerWidth;
    final double scoreWidth;
    final double cellPadding;
+   final double fontSize;
 
   WordSearchConfig({
     required this.words,
@@ -27,5 +28,6 @@ class WordSearchConfig {
     this.timerWidth = 140,
     this.scoreWidth = 20,
     this.cellPadding = 5,
+    this.fontSize = 20,
   });
 }

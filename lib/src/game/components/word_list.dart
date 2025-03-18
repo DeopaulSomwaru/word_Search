@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class WordList extends PositionComponent {
+  final double fontSize;
   final List<String> words;
   final List<String> foundWords;
   final double availableWidth;
@@ -10,6 +11,7 @@ class WordList extends PositionComponent {
   static const double backgroundPadding = 5.0;
 
   WordList({
+    required this.fontSize,
     required super.position,
     required this.words,
     required this.foundWords,
@@ -73,7 +75,7 @@ class WordList extends PositionComponent {
       textRenderer: TextPaint(
         style: TextStyle(
           color: isFound ? Colors.green : Colors.white70,
-          fontSize: 16,
+          fontSize: fontSize,
           fontWeight: isFound ? FontWeight.bold : FontWeight.normal,
           shadows: isFound ? _createTextShadows() : null,
         ),

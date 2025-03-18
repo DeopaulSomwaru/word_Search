@@ -14,7 +14,8 @@ class GameScreen extends StatelessWidget {
     return Scaffold(
       body: WordSearchGameWidget(
         config: WordSearchConfig(
-         words: ['RAINBOWWHIPTAIL', 'FERDELANCE', 'BUSHMASTER', 'AMPHISBAENA', 'ANILIUS', 'CAIMAN', 'IGUANA', 'GECKO', 'LABARIA', 'TEGU', 'PARROTSNAKE', 'VINESNAKE', 'EMERALDBOA', 'PUFFINGSNAKE', 'ARRAUTURTLE'],
+        //  words: ['RAINBOWWHIPTAIL', 'FERDELANCE', 'BUSHMASTER', 'AMPHISBAENA', 'ANILIUS', 'CAIMAN', 'IGUANA', 'GECKO', 'LABARIA', 'TEGU', 'PARROTSNAKE', 'VINESNAKE', 'EMERALDBOA', 'PUFFINGSNAKE', 'ARRAUTURTLE'],
+        words: ['JAGUAR', 'SLOTH', 'OTTER', 'PUMA', 'TAPIR'],
           onGameOver: (result) {
             // Handle game over
             print('Game Over!');

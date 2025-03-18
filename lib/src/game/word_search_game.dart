@@ -26,6 +26,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     timerWidth = config.timerWidth;
     scoreWidth = config.scoreWidth;
     cellPadding = config.cellPadding;
+    fontSize = config.fontSize;
   }
 
 
@@ -33,6 +34,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
    double cellPadding = 5.0; // Space between cells
 
   late int gridSize;
+  double fontSize = 16.0;
   late List<List<LetterComponent>> grid;
   List<String> words = [];
   List<String> foundWords = [];
@@ -174,6 +176,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
       initialTime: timeLeft,
     );
     wordList = WordList(
+      fontSize: fontSize,
       position: Vector2(20, size.y - wordHeight + 10),
       words: words,
       foundWords: foundWords,
