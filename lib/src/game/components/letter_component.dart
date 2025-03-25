@@ -21,7 +21,7 @@ class LetterComponent extends PositionComponent {
   Future<void> onLoad() async {
     background = RectangleComponent(
       size: size * 0.9,
-      position: size * 0.05,
+      position: size * 0.08,
       paint: Paint()
         ..color = Colors.white.withAlpha((0.1 * 255).toInt())
         ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 2),
@@ -34,7 +34,7 @@ class LetterComponent extends PositionComponent {
         style: const TextStyle(
           color: Colors.black,
           fontSize: 24,
-          fontWeight: FontWeight.bold,
+          // fontWeight: FontWeight.bold,
           shadows: [
             Shadow(
               blurRadius: 8,
@@ -65,7 +65,7 @@ class LetterComponent extends PositionComponent {
 
   void select() {
     isSelected = true;
-    background.paint.color = Colors.amber;  // Changed to yellow/amber for drag
+    background.paint.color = Colors.amber; // Changed to yellow/amber for drag
     add(
       ScaleEffect.by(
         Vector2.all(1.2),
@@ -82,7 +82,7 @@ class LetterComponent extends PositionComponent {
     background.paint.color = Colors.white.withAlpha((0.1 * 255).toInt());
     add(
       ScaleEffect.by(
-        Vector2.all(1/1.2),
+        Vector2.all(1 / 1.2),
         EffectController(
           duration: 0.15,
           curve: Curves.easeIn,
@@ -125,7 +125,7 @@ class LetterComponent extends PositionComponent {
           EffectController(duration: 0.2),
         ),
         ScaleEffect.by(
-          Vector2.all(1/1.3),
+          Vector2.all(1 / 1.3),
           EffectController(duration: 0.2),
         ),
       ]),
