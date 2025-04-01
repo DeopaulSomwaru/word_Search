@@ -108,14 +108,14 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     final longestWordLength = words.map((word) => word.length).reduce(max);
     final wordCount = words.length;
 
-    // Calculate buffer based on word count (1 extra row/column for every 6 words)
-    final buffer = (wordCount / 6).ceil();
+    // Calculate buffer based on the square root of word count to handle density
+    final buffer = sqrt(wordCount).ceil();
 
-    // Calculate base size considering word length and density
+    // Base size on longest word plus buffer, ensuring minimum size for placement
     int calculatedSize = longestWordLength + buffer;
 
-    // Ensure minimum size while allowing space for word placement
-    return max(longestWordLength + 2, calculatedSize).clamp(10, 20);
+    // Clamp between minimum and maximum to prevent overly large grids
+    return calculatedSize.clamp(longestWordLength + 2, 20);
   }
 
   double _calculateCellPadding() {
@@ -187,54 +187,34 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   }
 
   void placeWords() {
-    // Sort words by length (longest first)
     words.sort((a, b) => b.length.compareTo(a.length));
-
-    int maxAttempts = 3; // Maximum regeneration attempts
-    int attempts = 0;
-
     Random random = Random();
-    while (attempts < maxAttempts) {
-      // Clear the grid
-      for (int i = 0; i < gridSize; i++) {
-        for (int j = 0; j < gridSize; j++) {
-          grid[i][j].letter = '';
+    List<List<int>> directions = [
+      [0, 1], // Right
+      [1, 0], // Down
+      [0, -1], // Left
+      [-1, 0], // Up
+    ];
+
+    for (String word in words) {
+      bool placed = false;
+      int attempts = 0;
+
+      while (!placed && attempts < 1000) {
+        int dirIndex = random.nextInt(directions.length);
+        int row = random.nextInt(gridSize);
+        int col = random.nextInt(gridSize);
+
+        if (canPlaceWord(word, row, col, dirIndex)) {
+          placeWord(word, row, col, dirIndex);
+          placed = true;
         }
+        attempts++;
       }
 
-      // Try placing words
-      bool allWordsPlaced = true;
-      for (String word in words) {
-        bool placed = false;
-        int placementAttempts = 0;
-
-        while (!placed && placementAttempts < 500) {
-          int direction = random.nextInt(6); // Added more directions
-          int row = random.nextInt(gridSize);
-          int col = random.nextInt(gridSize);
-
-          if (canPlaceWord(word, row, col, direction)) {
-            placeWord(word, row, col, direction);
-            placed = true;
-          }
-          placementAttempts++;
-        }
-
-        if (!placed) {
-          allWordsPlaced = false;
-          break;
-        }
+      if (!placed) {
+        debugPrint('Failed to place word: $word');
       }
-
-      if (allWordsPlaced) {
-        break; // Exit if all words are placed
-      }
-
-      attempts++;
-    }
-
-    if (attempts == maxAttempts) {
-      debugPrint('Failed to place all words after $maxAttempts attempts');
     }
   }
 
@@ -299,35 +279,33 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   // }
 
   bool canPlaceWord(String word, int row, int col, int direction) {
-    // Only allow 4 directions (0-3) instead of 8
-    final directions = [
-      [0, 1], // Right (horizontal)
-      [1, 0], // Down (vertical)
-      [0, -1], // Left (horizontal)
-      [-1, 0] // Up (vertical)
+    List<List<int>> dirs = [
+      [0, 1],
+      [1, 0],
+      [0, -1],
+      [-1, 0]
     ];
+    if (direction >= dirs.length) return false;
 
-    if (direction >= directions.length) return false;
+    int dRow = dirs[direction][0];
+    int dCol = dirs[direction][1];
 
-    int dRow = directions[direction][0];
-    int dCol = directions[direction][1];
-
-    // Calculate end position
+    // Calculate required space
     int endRow = row + dRow * (word.length - 1);
     int endCol = col + dCol * (word.length - 1);
 
-    // Check bounds
+    // Check if the word fits within grid boundaries
     if (endRow < 0 || endRow >= gridSize || endCol < 0 || endCol >= gridSize) {
       return false;
     }
 
-    // Check each cell
+    // Check each cell in the path
     for (int i = 0; i < word.length; i++) {
-      int checkRow = row + dRow * i;
-      int checkCol = col + dCol * i;
+      int r = row + dRow * i;
+      int c = col + dCol * i;
 
-      if (grid[checkRow][checkCol].letter.isNotEmpty &&
-          grid[checkRow][checkCol].letter != word[i]) {
+      String cellLetter = grid[r][c].letter;
+      if (cellLetter.isNotEmpty && cellLetter != word[i]) {
         return false;
       }
     }
@@ -386,16 +364,18 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   //   }
   // }
 
+  bool _gameOverCalled = false;
+
   @override
   void update(double dt) {
-    if (!isGameStarted || isPaused) return;
+    if (!isGameStarted || isPaused || _gameOverCalled) return;
 
     super.update(dt);
     timeLeft -= dt;
     timerDisplay.updateTime(timeLeft.ceil());
 
-    // Only check game over every second, not every frame
-    if (timeLeft % 1 < dt && timeLeft <= 0) {
+    if (timeLeft <= 0) {
+      _gameOverCalled = true;
       gameOver();
     }
   }
@@ -445,22 +425,14 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     if (!isGameStarted || isPaused) return false;
 
     Vector2? cell = getGridCell(event.canvasPosition);
+    if (cell == null || selectedCells.contains(cell)) return false;
 
-    if (cell != null &&
-        selectedCells.isNotEmpty &&
-        !selectedCells.contains(cell)) {
-      // Check if new cell is adjacent to last selected cell
-      Vector2 lastCell = selectedCells.last;
-      double dx = (cell.x - lastCell.x).abs();
-      double dy = (cell.y - lastCell.y).abs();
+    List<Vector2> potentialPath = [...selectedCells, cell];
+    if (!isValidWordPath(potentialPath)) return false;
 
-      if (dx <= 1 && dy <= 1) {
-        // Adjacent including diagonals
-        selectedCells.add(cell);
-        grid[cell.x.toInt()][cell.y.toInt()].select();
-      }
-    }
-    return false;
+    selectedCells.add(cell);
+    grid[cell.x.toInt()][cell.y.toInt()].select();
+    return true;
   }
 
   // @override
@@ -542,39 +514,34 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   bool isValidWordPath(List<Vector2> cells) {
     if (cells.length < 2) return false;
 
-    // Calculate all direction vectors between consecutive cells
-    List<Vector2> directions = [];
-    for (int i = 1; i < cells.length; i++) {
-      Vector2 direction = cells[i] - cells[i - 1];
-      // Normalize direction to get consistent vectors for same directions
-      direction = direction.normalized();
-      if (directions.isEmpty || direction != directions.last) {
-        directions.add(direction);
+    // Check if all moves are in the same direction (straight line)
+    Vector2 initialDir = (cells[1] - cells[0]).normalized();
+    bool isStraight = true;
+
+    for (int i = 2; i < cells.length; i++) {
+      Vector2 dir = (cells[i] - cells[i - 1]).normalized();
+      if (dir != initialDir) {
+        isStraight = false;
+        break;
       }
     }
 
-    // Allow only straight lines (1 direction) or single 90-degree turns (2 directions)
-    if (directions.length > 2) return false;
+    if (isStraight) return true;
 
-    // For 2 directions, check if they form a right angle (dot product should be 0)
-    if (directions.length == 2) {
-      double dot = directions[0].dot(directions[1]);
-      if (dot.abs() > 0.1)
-        return false; // Not a right angle (with some tolerance)
+    // Check for exactly one right-angle turn
+    int turnCount = 0;
+    Vector2 prevDir = (cells[1] - cells[0]).normalized();
 
-      // Ensure the turn happens only once at the junction point
-      int turnIndex = -1;
-      for (int i = 1; i < cells.length - 1; i++) {
-        Vector2 prevDir = (cells[i] - cells[i - 1]).normalized();
-        Vector2 nextDir = (cells[i + 1] - cells[i]).normalized();
-        if (prevDir != nextDir) {
-          if (turnIndex != -1) return false; // Multiple turns
-          turnIndex = i;
-        }
+    for (int i = 2; i < cells.length; i++) {
+      Vector2 currDir = (cells[i] - cells[i - 1]).normalized();
+      if (currDir != prevDir) {
+        if (prevDir.dot(currDir) != 0) return false; // Not a right angle
+        if (++turnCount > 1) return false; // More than one turn
+        prevDir = currDir;
       }
     }
 
-    return true;
+    return turnCount == 1;
   }
 
   void checkSelectedWord() {
@@ -680,8 +647,9 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   }
 
   void gameOver([bool victory = false]) {
+    if (_gameOverCalled) return;
+    _gameOverCalled = true;
     isGameStarted = false;
-    isPaused = true;
 
     config.onGameOver(
       GameResult(
