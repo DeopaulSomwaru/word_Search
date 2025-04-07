@@ -512,7 +512,7 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
   bool onDragUpdate(DragUpdateEvent event) {
     if (!isGameStarted || isPaused) return false;
 
-    Vector2? cell = getGridCell(event.canvasPosition);
+    Vector2? cell = getGridCell(event.canvasStartPosition);
     if (cell == null || selectedCells.contains(cell)) return false;
 
     List<Vector2> potentialPath = [...selectedCells, cell];
