@@ -5,7 +5,6 @@ import 'package:find_the_word/src/ui/menus/game_over_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 
-
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
 
@@ -14,8 +13,24 @@ class GameScreen extends StatelessWidget {
     return Scaffold(
       body: WordSearchGameWidget(
         config: WordSearchConfig(
-        //  words: ['RAINBOWWHIPTAIL', 'FERDELANCE', 'BUSHMASTER', 'AMPHISBAENA', 'ANILIUS', 'CAIMAN', 'IGUANA', 'GECKO', 'LABARIA', 'TEGU', 'PARROTSNAKE', 'VINESNAKE', 'EMERALDBOA', 'PUFFINGSNAKE', 'ARRAUTURTLE'],
-        words: ['JAGUAR', 'SLOTH', 'OTTER', 'PUMA', 'TAPIR'],
+          //  words: ['RAINBOWWHIPTAIL', 'FERDELANCE', 'BUSHMASTER', 'AMPHISBAENA', 'ANILIUS', 'CAIMAN', 'IGUANA', 'GECKO', 'LABARIA', 'TEGU', 'PARROTSNAKE', 'VINESNAKE', 'EMERALDBOA', 'PUFFINGSNAKE', 'ARRAUTURTLE'],
+          words: [
+            'JAGUARUNDI',
+            'CAPUCHIN',
+            'GIANTOTTER',
+            'PACA',
+            'AGOUTI',
+            'OCELOT',
+            'TAMANDUA',
+            'KINKAJOU',
+            'MARGAY',
+            'BUSHDOG',
+            'ARMADILLO',
+            'PECCARY',
+            'WOOLLYMONKEY',
+            'SAKI',
+            'HOWLER'
+          ],
           onGameOver: (result) {
             // Handle game over
             print('Game Over!');
@@ -46,6 +61,7 @@ class GameScreen extends StatelessWidget {
     // );
   }
 }
+
 class WordSearchGameWidget extends StatelessWidget {
   final WordSearchConfig config;
 
@@ -62,10 +78,10 @@ class WordSearchGameWidget extends StatelessWidget {
         child: CircularProgressIndicator(
           color: config.primaryColor,
         ),
-
       ),
       overlayBuilderMap: {
-        'gameOver': (context, game) => GameOverMenu(game: game as WordSearchGame),
+        'gameOver': (context, game) =>
+            GameOverMenu(game: game as WordSearchGame),
       },
     );
   }
