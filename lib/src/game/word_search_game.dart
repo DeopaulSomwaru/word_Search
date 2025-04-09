@@ -68,133 +68,61 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
   @override
   Future<void> onLoad() async {
-    // 1. Calculate grid size FIRST
     gridSize = calculateGridSize();
+    cellPadding = _calculateCellPadding(); // New dynamic padding calculation
 
-    // 2. Calculate cell padding SECOND (depends on gridSize)
-    // cellPadding = _calculateCellPaddingFor();
-
-    // 3. Calculate available space THIRD
-    final availableWidth = size.x * gridWidthPercentage - (gridSize * 2);
-    final availableHeight =
-        size.y - topUIHeight - bottomUIHeight - (gridSize * 2);
-
-    // 4. Calculate cell size FOURTH (depends on gridSize and cellPadding)
-    cellSize = min(
-      (availableWidth - (cellPadding * (gridSize - 1))) / gridSize,
-      (availableHeight - (cellPadding * (gridSize - 1))) / gridSize,
-    ).clamp(25.0, 40.0);
-
-    // 5. Initialize visual components
     final background = BackgroundDesign();
     await add(background);
     background.size = size;
 
-    // 6. Calculate board dimensions
-    final boardWidth = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
-    final boardHeight = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
-    gridOffset = (size.x - boardWidth) / 2;
     topPadding = topUIHeight;
 
-    // 7. Initialize game components
+    // Calculate cell size with padding
+    final availableWidth = size.x * gridWidthPercentage;
+    final availableHeight = size.y - topUIHeight - bottomUIHeight;
+    cellSize = min(
+      (availableWidth - (cellPadding * (gridSize - 1))) / gridSize,
+      (availableHeight - (cellPadding * (gridSize - 1))) / gridSize,
+    );
+
+    // Calculate total board size including padding
+    final boardWidth = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
+    final boardHeight = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
+
+    gridOffset = (size.x - boardWidth) / 2;
+
     initializeBoard(boardWidth, boardHeight);
     initializeGrid();
     placeWords();
     fillEmptySpaces();
     await addLettersWithAnimation();
     addUIComponents();
-
-    // 8. Start game
     isGameStarted = true;
   }
-  // Future<void> onLoad() async {
-  //   // New cell size calculation with padding consideration
-  //   final availableWidth = size.x * gridWidthPercentage - (gridSize * 2);
-  //   final availableHeight =
-  //       size.y - topUIHeight - bottomUIHeight - (gridSize * 2);
-
-  //   cellSize = min(
-  //     (availableWidth - (cellPadding * (gridSize - 1))) / gridSize,
-  //     (availableHeight - (cellPadding * (gridSize - 1))) / gridSize,
-  //   ).clamp(25.0, 40.0); // Clamp to reasonable size
-  //   gridSize = calculateGridSize();
-  //   cellPadding = _calculateCellPadding(); // New dynamic padding calculation
-
-  //   final background = BackgroundDesign();
-  //   await add(background);
-  //   background.size = size;
-
-  //   topPadding = topUIHeight;
-
-  //   // Calculate cell size with padding
-  //   // final availableWidth = size.x * gridWidthPercentage;
-  //   // final availableHeight = size.y - topUIHeight - bottomUIHeight;
-  //   cellSize = min(
-  //     (availableWidth - (cellPadding * (gridSize - 1))) / gridSize,
-  //     (availableHeight - (cellPadding * (gridSize - 1))) / gridSize,
-  //   );
-
-  //   // Calculate total board size including padding
-  //   final boardWidth = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
-  //   final boardHeight = (cellSize * gridSize) + (cellPadding * (gridSize - 1));
-
-  //   gridOffset = (size.x - boardWidth) / 2;
-
-  //   initializeBoard(boardWidth, boardHeight);
-  //   initializeGrid();
-  //   placeWords();
-  //   fillEmptySpaces();
-  //   await addLettersWithAnimation();
-  //   addUIComponents();
-  //   isGameStarted = true;
-  // }
 
   // int calculateGridSize() {
   //   int longestWordLength = words.map((word) => word.length).reduce(max);
   //   return max(10, longestWordLength); // Ensure a minimum grid size of 10x10
   // }
-  // int calculateGridSize() {
-  //   final longestWordLength = words.map((word) => word.length).reduce(max);
-  //   final wordCount = words.length;
-
-  //   // Calculate buffer based on the square root of word count to handle density
-  //   final buffer = sqrt(wordCount).ceil();
-
-  //   // Base size on longest word plus buffer, ensuring minimum size for placement
-  //   int calculatedSize = longestWordLength + buffer;
-
-  //   // Clamp between minimum and maximum to prevent overly large grids
-  //   return calculatedSize.clamp(longestWordLength + 2, 20);
-  // }
-
   int calculateGridSize() {
-    final longestWord = words.map((word) => word.length).reduce(max);
+    final longestWordLength = words.map((word) => word.length).reduce(max);
     final wordCount = words.length;
 
-    // New grid size formula
-    int baseSize = longestWord + (wordCount ~/ 2);
-    int buffer = (baseSize * 0.3).ceil();
+    // Calculate buffer based on the square root of word count to handle density
+    final buffer = sqrt(wordCount).ceil();
 
-    int sizeWithBuffer = baseSize + buffer;
+    // Base size on longest word plus buffer, ensuring minimum size for placement
+    int calculatedSize = longestWordLength + buffer;
 
-    // Try max size that fits the screen (fallback clamp)
-    for (int s = sizeWithBuffer.clamp(10, 25); s >= longestWord + 2; s--) {
-      double testCellSize = min(
-        (size.x * gridWidthPercentage - (s - 1) * _calculateCellPaddingFor(s)) /
-            s,
-        ((size.y - topUIHeight - bottomUIHeight) -
-                (s - 1) * _calculateCellPaddingFor(s)) /
-            s,
-      );
-      if (testCellSize >= 25.0) return s;
-    }
-
-    return longestWord + 2;
+    // Clamp between minimum and maximum to prevent overly large grids
+    return calculatedSize.clamp(longestWordLength + 2, 20);
   }
 
-  double _calculateCellPaddingFor(int size) {
-    final basePadding = 8.0 + (size * 0.2);
-    return basePadding.clamp(10.0, 15.0);
+  double _calculateCellPadding() {
+    // Dynamic padding based on grid size (larger grids get smaller padding)
+    final basePadding = 8.0;
+    final paddingReduction = gridSize / 12;
+    return (basePadding - paddingReduction).clamp(4.0, 8.0);
   }
 
   void initializeBoard(double boardWidth, double boardHeight) {
@@ -209,21 +137,23 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
 
   void initializeGrid() {
     grid = List.generate(
+      gridSize,
+      (i) => List.generate(
         gridSize,
-        (i) => List.generate(gridSize, (j) {
-              final paddingOffset = cellPadding * j;
-              return LetterComponent(
-                  position: Vector2(
-                    gridOffset + j * (cellSize + cellPadding) + paddingOffset,
-                    topPadding + i * (cellSize + cellPadding) + paddingOffset,
-                  ),
-                  size: Vector2.all(cellSize),
-                  letter: '',
-                  targetPosition: Vector2(
-                    gridOffset + j * (cellSize + cellPadding),
-                    topPadding + i * (cellSize + cellPadding),
-                  ));
-            }));
+        (j) => LetterComponent(
+          position: Vector2(
+            gridOffset + j * (cellSize + cellPadding),
+            -(cellSize + cellPadding) * (gridSize - i),
+          ),
+          size: Vector2.all(cellSize),
+          letter: '',
+          targetPosition: Vector2(
+            gridOffset + j * (cellSize + cellPadding),
+            topPadding + i * (cellSize + cellPadding),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> addLettersWithAnimation() async {
@@ -409,32 +339,14 @@ class WordSearchGame extends FlameGame with TapCallbacks, DragCallbacks {
     }
   }
 
-  // void fillEmptySpaces() {
-  //   const String alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  //   Random random = Random();
-
-  //   for (int i = 0; i < gridSize; i++) {
-  //     for (int j = 0; j < gridSize; j++) {
-  //       if (grid[i][j].letter.isEmpty) {
-  //         grid[i][j].letter = alphabet[random.nextInt(alphabet.length)];
-  //       }
-  //     }
-  //   }
-  // }
-
   void fillEmptySpaces() {
     const String alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     Random random = Random();
-    double fillProbability =
-        0.6; // 60% chance to fill a cell (adjust as needed)
 
     for (int i = 0; i < gridSize; i++) {
       for (int j = 0; j < gridSize; j++) {
         if (grid[i][j].letter.isEmpty) {
-          // Only fill cells randomly based on probability
-          if (random.nextDouble() < fillProbability) {
-            grid[i][j].letter = alphabet[random.nextInt(alphabet.length)];
-          }
+          grid[i][j].letter = alphabet[random.nextInt(alphabet.length)];
         }
       }
     }
